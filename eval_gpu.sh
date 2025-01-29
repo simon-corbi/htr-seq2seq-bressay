@@ -19,6 +19,10 @@ echo "Create dir for log"
 CURRENTDATE=`date +"%Y-%m-%d"`
 echo "currentDate :"
 echo $CURRENTDATE
+PATHLOG="/proj/document_analysis/users/x_scorb/logs/multiscripts/${CURRENTDATE}_ID_${SLURM_JOB_ID}/"
+echo "path log :"
+echo ${PATHLOG}
+mkdir ${PATHLOG}
 
 
 output_file="${PATHLOG}/${SLURM_JOB_ID}.txt"
