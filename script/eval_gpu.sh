@@ -27,8 +27,8 @@ mkdir ${PATHLOG}
 
 output_file="${PATHLOG}/${SLURM_JOB_ID}.txt"
 
-# export PYTHONPATH=/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/
-export PYTHONPATH="${PYTHONPATH}:/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/"
+export PYTHONPATH=/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/
+# export PYTHONPATH="${PYTHONPATH}:/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/"
 
 # The job
 # -u : Force les flux de sortie et d'erreur standards à ne pas utiliser de tampon. Cette option n'a pas d'effet sur le flux d'entrée standard
