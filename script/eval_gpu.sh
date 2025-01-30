@@ -13,7 +13,7 @@ source /home/x_scorb/miniconda3/etc/profile.d/conda.sh
 conda activate htr
 
 # Parameters
-main_script=/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/src/eval.py
+main_script=/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/eval.py
 
 echo "Create dir for log"
 CURRENTDATE=`date +"%Y-%m-%d"`
