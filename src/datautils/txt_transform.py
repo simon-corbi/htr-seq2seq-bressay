@@ -15,7 +15,7 @@ def transcript_tranforme_base(dictionary, str_to_transform, use_delimiter_tokens
     for c in str_to_transform:
         if c not in dictionary:
             print("Text unknow char in dictionnary : " + str(c))
-            return -1
+            # return -1
         else:
             labels.append(dictionary.get(c))
 
