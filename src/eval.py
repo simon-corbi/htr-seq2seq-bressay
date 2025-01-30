@@ -7,9 +7,9 @@ import torch
 from torch.utils.data import DataLoader
 
 import sys
+
 print("Python executable:", sys.executable)
 print("Python path:", sys.path)
-
 
 from src.datautils.batch_collate import CollateImageLabelMultiDecodersV3
 from src.datautils.bressay_dataset import BressayDataset
@@ -25,9 +25,9 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--dir_data", type=str, help='Path to Bressay data ex: /test')
 # parser.add_argument("--dir_save", type=str)
-#parser.add_argument('--level', choices=['lines', 'pages', 'paragraphs'], default='lines', required=True,
+# parser.add_argument('--level', choices=['lines', 'pages', 'paragraphs'], default='lines', required=True,
 #                    help='Granularity of text level')
-#parser.add_argument('--partition', choices=['training', 'validation', 'test'], default='test',
+# parser.add_argument('--partition', choices=['training', 'validation', 'test'], default='test',
 #                    help='Dataset partition to read')
 
 # For GPU
@@ -70,7 +70,6 @@ c_collate_fn = CollateImageLabelMultiDecodersV3(imgs_pad_value=[0],
                                                 pad_pos_tag=TOKEN_POSITION_DICT[PAD_STR_TOKEN],
                                                 pad_iscross_tag=TOKEN_IS_CROSS_DICT[PAD_STR_TOKEN],
                                                 pad_isreadable=TOKEN_IS_READABLE_DICT[PAD_STR_TOKEN])
-
 
 collate_fn = c_collate_fn.collate_fn
 
@@ -169,4 +168,3 @@ print("End")
 
 # 2- Evaluate
 # evaluate_bressay(args.dir_data, args.level, args.partition, args.dir_save)
-
