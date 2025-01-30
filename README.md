@@ -31,10 +31,11 @@ To DO
 
 ## Testing Line Level
 
-src/eval.py
+eval.py
 
 specify directory --dir_data (contain images and labels)
 
-CER Test: %
+Final Line test set (small difference than competition set)
+CER: 3.59%
 
 Note: CER calculation 
