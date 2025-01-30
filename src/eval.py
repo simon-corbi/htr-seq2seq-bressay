@@ -6,6 +6,11 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+import sys
+print("Python executable:", sys.executable)
+print("Python path:", sys.path)
+
+
 from src.datautils.batch_collate import CollateImageLabelMultiDecodersV3
 from src.datautils.bressay_dataset import BressayDataset
 from src.datautils.generic_charset import GenericCharset
