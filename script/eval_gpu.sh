@@ -33,7 +33,7 @@ export PYTHONPATH=/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressa
 # The job
 # -u : Force les flux de sortie et d'erreur standards à ne pas utiliser de tampon. Cette option n'a pas d'effet sur le flux d'entrée standard
 python -u $main_script \
-  --dir_data "/proj/document_analysis/users/x_scorb/data/bressay_final/data_split/lines" \
+  --dir_data "/proj/document_analysis/users/x_scorb/data/bressay_final/data_split/lines/test" \
   --num_workers 4 \
 >> $output_file
 
