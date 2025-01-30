@@ -35,7 +35,7 @@ eval.py
 
 specify directory --dir_data (contain images and labels)
 
-Final Line test set (small difference than competition set)
-CER: 3.59%
+Final Line test set (small difference than competition set): CER: 3.59%
 
-Note: CER calculation 
+CER calculation different that one used in competition
+
