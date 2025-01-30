@@ -43,7 +43,7 @@ width_max = 768
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 # Paths
-path_model = "model_weights/seq2seq_epoch_120.torch"
+path_model = "model_weights/seq2seq.torch"
 charset_file = "data/charset.txt"
 
 # Alphabet
