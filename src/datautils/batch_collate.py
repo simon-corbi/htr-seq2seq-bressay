@@ -60,10 +60,6 @@ class CollateImageLabelMultiDecodersV3(object):
         ind_is_readable = pad_sequences_1D(ind_is_readable, padding_value=self.pad_isreadable)
         ind_is_readable = torch.tensor(ind_is_readable).long()
 
-        # ind_tag_all = [batch_data[i]["labels_allformat"]["ind_tag_all"] for i in range(len(batch_data))]
-        # ind_tag_all = pad_sequences_1D(ind_tag_all, padding_value=self.pad_alltag)
-        # ind_tag_all = torch.tensor(ind_tag_all).long()
-
         imgs = [batch_data[i]["img"] for i in range(len(batch_data))]
         imgs_shape = [batch_data[i]["img_shape"] for i in range(len(batch_data))]
         imgs_reduced_shape = [batch_data[i]["img_reduced_shape"] for i in range(len(batch_data))]
@@ -72,7 +68,6 @@ class CollateImageLabelMultiDecodersV3(object):
 
         imgs = torch.tensor(imgs).float()
 
-        # Collate all formats of label -> use subset in training loop
         formatted_batch_data = {
             "ids": ids,
 
@@ -88,8 +83,7 @@ class CollateImageLabelMultiDecodersV3(object):
 
             "ind_pos": ind_pos,
             "ind_is_cross": ind_is_cross,
-            "ind_is_readable": ind_is_readable,
-            # "ind_tag_all": ind_tag_all
+            "ind_is_readable": ind_is_readable
         }
 
         return formatted_batch_data

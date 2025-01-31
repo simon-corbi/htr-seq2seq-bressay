@@ -1,5 +1,21 @@
 import numpy as np
+import cv2
+
 from skimage.transform import resize
+
+
+def affine_transformation(img, m=1.0, s=.2, border_value=None):
+    h, w = img.shape[0], img.shape[1]
+    src_point = np.float32([[w / 2.0, h / 3.0],
+                            [2 * w / 3.0, 2 * h / 3.0],
+                            [w / 3.0, 2 * h / 3.0]])
+    random_shift = m + np.random.uniform(-1.0, 1.0, size=(3,2)) * s
+    dst_point = src_point * random_shift.astype(np.float32)
+    transform = cv2.getAffineTransform(src_point, dst_point)
+    if border_value is None:
+        border_value = np.median(img)
+    warped_img = cv2.warpAffine(img, transform, dsize=(w, h), borderValue=float(border_value))
+    return warped_img
 
 
 def apply_preprocessing_multiscale(img, fheight, fwidth):

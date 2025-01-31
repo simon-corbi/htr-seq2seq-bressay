@@ -27,7 +27,9 @@ Model weights available in directory "model_weights"
 
 ## Training
 
-To DO
+define path dataset_folder (with train, validation and test) and a log_dir
+
+train.py
 
 ## Testing Line Level
 

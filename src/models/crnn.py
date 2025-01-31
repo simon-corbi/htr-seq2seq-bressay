@@ -1,7 +1,5 @@
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
-
 
 # From DAS article
 class BasicBlock(nn.Module):
@@ -62,10 +60,7 @@ class CNN(nn.Module):
         for i, nn_module in enumerate(self.features):
             y = nn_module(y)
 
-        #if self.flattening == 'maxpool':
         y = F.max_pool2d(y, [y.size(2), self.k], stride=[y.size(2), 1], padding=[0, self.k // 2])
-        # elif self.flattening == 'concat':
-        #     y = y.view(y.size(0), -1, 1, y.size(3))
 
         return y
 
@@ -84,8 +79,6 @@ class CTCHead(nn.Module):
         self.rec = nn.LSTM(input_size, hidden, num_layers=num_layers, bidirectional=True, dropout=.2)
         self.fnl = nn.Sequential(nn.Dropout(.2), nn.Linear(2 * hidden, nclasses))
 
-        #self.att = nn.Sequential(nn.Dropout(.5), nn.Linear(2 * hidden, nclasses), nn.Sigmoid())
-
         self.cnn = nn.Conv2d(input_size, nclasses, kernel_size=(1, 3), stride=1, padding=(0, 1))
 
     def forward(self, x):
@@ -93,8 +86,6 @@ class CTCHead(nn.Module):
         # x dimension: batch size, 256, 1,  nb frames
         y = x.permute(2, 3, 0, 1)[0]  # Output dimension: nb frames, batch size, 256
         y = self.rec(y)[0]
-        # a = self.att(y)
-        # y = (a * self.fnl(y) + (1 - a) * self.cnn(x))
         y = self.fnl(y)  # Output dimension: nb frames, batch size, alphabet size
 
         y_aux = self.cnn(x).permute(2, 3, 0, 1)[0]
@@ -108,12 +99,7 @@ class CRNN(nn.Module):
 
         self.features = CNN(cnn_cfg)
 
-        # if flattening == 'maxpool':
         hidden = cnn_cfg[-1][-1]
-        # elif flattening == 'concat':
-        #     hidden = 2 * 8 * cnn_cfg[-1][-1]
-        # else:
-        #     print('problem!')
 
         self.top = CTCHead(hidden, head_cfg, nclasses)
 
@@ -127,7 +113,3 @@ class CRNN(nn.Module):
     def freeze(self):
         for param in self.parameters():
             param.requires_grad = False
-
-# def set_bn_eval(m):
-#     if isinstance(m, nn.modules.batchnorm._BatchNorm):
-#         m.eval()

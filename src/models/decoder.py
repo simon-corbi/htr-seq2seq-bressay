@@ -13,14 +13,6 @@ class Decoder(nn.Module):
                  hidden_size: int,
                  dropout: float = 0.5):
         """
-
-        Parameters
-        ----------
-        nbr_characters : with eos and sos
-        embed_dim
-        context_dim
-        hidden_size
-        dropout
         """
 
         super(Decoder, self).__init__()
@@ -47,28 +39,6 @@ class Decoder(nn.Module):
                 hidden_state: Tuple[Tensor]
                 ):
         """
-
-        Parameters
-        ----------
-        characters: Tensor
-            Tensor of shape (batch_size) containing the previous characters.
-            This tensor contains integers in range [0; nbr_characters-1].
-        previous_context: Tensor
-            Tensor of shape (batch_size, context_dim) containing the context computed in the previous step by an
-            attention mechanism.
-        context: Tensor
-            Tensor of shape (batch_size, context_dim) containing the context computed in the current step by an
-            attention mechanism.
-        hidden_state: Tuple[Tensor]
-            Tuple containing 2 tensors of shape (1, batch_size, hidden_size) containing the previous hidden_state of the
-            rnn.
-
-        Returns
-        -------
-        characters_scores
-            (batch_size, nbr_characters)
-        new_hidden_state
-
         """
 
         # (batch_size) -> (batch_size, embed_dim)

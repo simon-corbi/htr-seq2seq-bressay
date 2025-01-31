@@ -1,41 +1,27 @@
 import argparse
 import os
 
-import editdistance as editdistance
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-import sys
-
-print("Python executable:", sys.executable)
-print("Python path:", sys.path)
 
 from src.datautils.batch_collate import CollateImageLabelMultiDecodersV3
 from src.datautils.bressay_dataset import BressayDataset
 from src.datautils.generic_charset import GenericCharset
 from src.datautils.token_dataset_bressay import TOKEN_POSITION_CHAR_LEVEL_DICT, TOKEN_IS_READABLE_CHAR_LEVEL_DICT, \
-    TOKEN_IS_CROSS_CHAR_LEVEL_DICT, SOS_STR_TOKEN, PAD_STR_TOKEN, TOKEN_POSITION_DICT, TOKEN_IS_READABLE_DICT, \
-    TOKEN_IS_CROSS_DICT
-from src.datautils.txt_transform import best_path
+    TOKEN_IS_CROSS_CHAR_LEVEL_DICT, PAD_STR_TOKEN, TOKEN_POSITION_DICT, TOKEN_IS_READABLE_DICT, \
+    TOKEN_IS_CROSS_DICT, EOS_STR_TOKEN
+from src.evaluation.eval_one_epoch import evaluate_one_epoch
 from src.models.models_utils import load_pretrained_model
 from src.models.seq2seq import Seq2SeqMultidecoders
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--dir_data", type=str, help='Path to Bressay data ex: /test')
-# parser.add_argument("--dir_save", type=str)
-# parser.add_argument('--level', choices=['lines', 'pages', 'paragraphs'], default='lines', required=True,
-#                    help='Granularity of text level')
-# parser.add_argument('--partition', choices=['training', 'validation', 'test'], default='test',
-#                    help='Dataset partition to read')
-
-# For GPU
 parser.add_argument('--num_workers', default=0, type=int)
 
 args = parser.parse_args()
-
-# os.makedirs(args.dir_save, exist_ok=True)
 
 height_max = 32
 width_max = 768
@@ -50,6 +36,8 @@ charset_file = "data/charset.txt"
 charset = GenericCharset(charset_file, use_blank=True, use_sos=True, use_eos=True)
 char_list = charset.get_charset_list()
 char_dict = charset.get_charset_dictionary()
+
+token_eos = char_dict.get(EOS_STR_TOKEN)
 
 # Data
 width_divisor = 2
@@ -106,65 +94,21 @@ if os.path.isfile(path_model):
     load_pretrained_model(path_model, model, device)
 
 model = model.to(device)
-model.eval()
 
 # Evaluate
-cer_total = 0
-nb_total_letter_gt = 0
+dict_result = evaluate_one_epoch(bressay_dataloader,
+                                 model,
+                                 device,
+                                 char_list,
+                                 char_dict["<BLANK>"],
+                                 token_eos)
 
-with torch.no_grad():
-    for index_batch, batch_data in enumerate(bressay_dataloader):
-        ids_batch = batch_data["ids"]
-        x = batch_data["imgs"].to(device)
-        x_reduced_len = [s[1] for s in batch_data["imgs_reduced_shape"]]
+dict_result["metric_final_dec"].print_values()
+dict_result["metrics_main_enc"].print_values()
+dict_result["metrics_dec_txt"].print_values()
 
-        y_gt_txt = batch_data["label_str_raw"]
-        # Remove text padding
-        y_gt_txt = [t.strip() for t in y_gt_txt]
+dict_result["metrics_dec_pos_tag"].print_values()
+dict_result["metrics_dec_cross_tag"].print_values()
+dict_result["metrics_dec_read_tag"].print_values()
 
-        nb_item_batch = x.shape[0]
-
-        dec_txt, dec_tag_pos, dec_tag_cross, dec_tag_readable, encoder_out = model.predict_4decoders(
-            x,
-            char_dict[SOS_STR_TOKEN],
-            TOKEN_POSITION_CHAR_LEVEL_DICT[SOS_STR_TOKEN],
-            TOKEN_IS_CROSS_CHAR_LEVEL_DICT[SOS_STR_TOKEN],
-            TOKEN_IS_READABLE_CHAR_LEVEL_DICT[SOS_STR_TOKEN])
-
-        # Decoder
-        decoder_outputs_cpu = dec_txt.cpu()
-        pred_dec_txt = [best_path(l, char_list, char_dict[SOS_STR_TOKEN]) for l in decoder_outputs_cpu]
-
-        # Remove text padding
-        pred_dec_txt = [t.strip() for t in pred_dec_txt]
-
-        # Final prediction is text decoder
-        final_pred = pred_dec_txt
-
-        cers = [editdistance.eval(u, v) for u, v in zip(y_gt_txt, final_pred)]
-
-        cer_total += sum(cers)
-        nb_total_letter_gt += sum([len(t) for t in y_gt_txt])
-
-        for p, one_id, gt_txt in zip(final_pred, ids_batch, y_gt_txt):
-            print("-----Ground truth:-----")
-            print(gt_txt)
-            print("Prediction: ")
-            print(p)
-
-            # # Save text prediction decoder
-            # path_pred_txt = os.path.join(args.dir_save, one_id + ".txt")
-            #
-            # #  with open(path_pred_txt, 'w', encoding="utf-8") as file:
-            # with open(path_pred_txt, 'w') as file:
-            #     file.write(p)
-
-cer_total /= nb_total_letter_gt
-
-print(f"CER: {100 * cer_total:.2f}% ")
-
-print()
 print("End")
-
-# 2- Evaluate
-# evaluate_bressay(args.dir_data, args.level, args.partition, args.dir_save)

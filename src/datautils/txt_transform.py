@@ -32,23 +32,8 @@ def append_preds(pg_preds, line_preds):
     return pg_preds
 
 
-def convert_int_to_chars(indices, char_list, break_on_eos=True):
+def convert_int_to_chars(indices, char_list, break_on_eos=True, filter_sos=False):
     """
-    This function applies a int to character dictionary to every int in a sequence
-
-    Parameters
-    ----------
-    indices: int array
-        A sequence of integers to decode
-    char_list: char array
-        A list of characters
-    break_on_eos: bool
-        Whether or not (default is set to true) to stop conversion when encountering a <eos> token
-
-    Returns
-    -------
-    char_sequence: char array
-        The decoded sequence
     """
 
     chars_sequence = ""
@@ -56,6 +41,9 @@ def convert_int_to_chars(indices, char_list, break_on_eos=True):
     for char_index in indices:
         try:
             c = char_list[char_index]
+
+            if c == SOS_STR_TOKEN and filter_sos:
+                continue
             if c == "<eos>" and break_on_eos:
                 break
             chars_sequence += c
@@ -119,8 +107,6 @@ def best_path(probabilities, char_list, eos_index, blank_index=0):
 def read_all_txt(path_file, add_space_before_after=True):
     content_str = ""
 
-    # , encoding="utf-8"
-    #with open(path_file) as file:
     with open(path_file, encoding="utf-8") as file:
         all_lines = file.readlines()
 
@@ -137,27 +123,10 @@ def read_all_txt(path_file, add_space_before_after=True):
 
 def compute_index_tag_for_seq2seq_v2_char_level(txt_input):
 
-    # stats_special_txt_2d = {
-    #     "total_cross": 0,
-    #     "total_over": 0,
-    #     "total_sub": 0,
-    #     "total_nonreadable_cross": 0,
-    #     "total_nonreadable": 0,
-    # }
-    # stats_special_txt_4d = {
-    #     "total_cross": 0,
-    #     "total_over": 0,
-    #     "total_sub": 0,
-    #     "total_nonreadable_cross": 0,
-    #     "total_nonreadable": 0,
-    # }
-
     # Initialisation with start of sequence token
     ind_pos = [TOKEN_POSITION_CHAR_LEVEL_DICT[SOS_STR_TOKEN]]
     ind_is_cross = [TOKEN_IS_CROSS_CHAR_LEVEL_DICT[SOS_STR_TOKEN]]
     ind_is_readable = [TOKEN_IS_READABLE_CHAR_LEVEL_DICT[SOS_STR_TOKEN]]
-
-   #  ind_tag_all = [ALL_TOKENS_CHAR_LEVEL_DICT[SOS_STR_TOKEN]]
 
     index_char = 0
     for one_char in txt_input:
@@ -166,20 +135,10 @@ def compute_index_tag_for_seq2seq_v2_char_level(txt_input):
             ind_pos.append(TOKEN_POSITION_CHAR_LEVEL_DICT["over"])
             ind_is_cross.append(TOKEN_IS_CROSS_CHAR_LEVEL_DICT["no_cross"])
             ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["readable"])
-
-            #ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["over"])
-
-            # stats_special_txt_4d["total_over"] += 1
-            # stats_special_txt_2d["total_over"] += 1
         elif one_char == "$":
             ind_pos.append(TOKEN_POSITION_CHAR_LEVEL_DICT["sub"])
             ind_is_cross.append(TOKEN_IS_CROSS_CHAR_LEVEL_DICT["no_cross"])
             ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["readable"])
-
-            # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["sub"])
-
-            # stats_special_txt_4d["total_sub"] += 1
-            # stats_special_txt_2d["total_sub"] += 1
         elif one_char == "-":
             # Check is double dash: --
             previous_index = index_char - 1
@@ -202,14 +161,9 @@ def compute_index_tag_for_seq2seq_v2_char_level(txt_input):
             # Is the cross tag
             if previous_is_cross or next_is_cross:
                 ind_is_cross.append(TOKEN_IS_CROSS_CHAR_LEVEL_DICT["cross"])
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["cross"])
-
-                # stats_special_txt_4d["total_cross"] += 1
-                # stats_special_txt_2d["total_cross"] += 1
             # Is the - character
             else:
                 ind_is_cross.append(TOKEN_IS_CROSS_CHAR_LEVEL_DICT["no_cross"])
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["text"])
 
         elif one_char == "x":
             # Check is neighbourg is x or -
@@ -240,29 +194,15 @@ def compute_index_tag_for_seq2seq_v2_char_level(txt_input):
             # -xx
             if previous_is_cross and next_is_x:
                 ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["non_readable_cross"])
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["non_readable_cross"])
-
-                # stats_special_txt_4d["total_nonreadable_cross"] += 1
-                # stats_special_txt_2d["total_nonreadable_cross"] += 1
             # xxx
             elif previous_is_x and next_is_x:
                 ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["non_readable_cross"])
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["non_readable_cross"])
-
-                # stats_special_txt_4d["total_nonreadable_cross"] += 1
-                # stats_special_txt_2d["total_nonreadable_cross"] += 1
             # xx-
             elif previous_is_x and next_is_cross:
                 ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["non_readable_cross"])
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["non_readable_cross"])
-
-                # stats_special_txt_4d["total_nonreadable_cross"] += 1
-                # stats_special_txt_2d["total_nonreadable_cross"] += 1
             # is x character
             else:
                 ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["readable"])
-
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["text"])
 
         elif one_char == "@" or one_char == "?":
             # Simple check is neighbourg is @ or ?
@@ -286,26 +226,18 @@ def compute_index_tag_for_seq2seq_v2_char_level(txt_input):
             # Is the non readable tag
             if previous_is_non_readable_char or next_is_non_readable_char:
                 ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["non_readable"])
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["non_readable"])
-
-                # stats_special_txt_4d["total_nonreadable"] += 1
-                # stats_special_txt_2d["total_nonreadable"] += 1
             # Is the @ or ? character
             else:
                 ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["readable"])
-                # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["text"])
         # "normal" character
         else:
             ind_pos.append(TOKEN_POSITION_CHAR_LEVEL_DICT["main"])
             ind_is_cross.append(TOKEN_IS_CROSS_CHAR_LEVEL_DICT["no_cross"])
             ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT["readable"])
 
-            # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT["text"])
-
         index_char += 1
 
     # Add End Of Sequence
-    # ind_tag_all.append(ALL_TOKENS_CHAR_LEVEL_DICT[EOS_STR_TOKEN])
     ind_pos.append(TOKEN_POSITION_CHAR_LEVEL_DICT[EOS_STR_TOKEN])
     ind_is_cross.append(TOKEN_IS_CROSS_CHAR_LEVEL_DICT[EOS_STR_TOKEN])
     ind_is_readable.append(TOKEN_IS_READABLE_CHAR_LEVEL_DICT[EOS_STR_TOKEN])
@@ -314,9 +246,6 @@ def compute_index_tag_for_seq2seq_v2_char_level(txt_input):
         "ind_pos": ind_pos,
         "ind_is_cross": ind_is_cross,
         "ind_is_readable": ind_is_readable,
-        # "ind_tag_all": ind_tag_all,
-        # "stats_special_txt_2d": stats_special_txt_2d,
-        # stats_special_txt_4d": stats_special_txt_4d,
     }
 
     return gt_dict
@@ -338,10 +267,7 @@ def gt_transform_seq2seq_txt_multidecoders_use_tag_in_txt_char_level(path_label,
         "label_ind_dec": label_ind_dec,
         "ind_pos": index_format_dict["ind_pos"],
         "ind_is_cross": index_format_dict["ind_is_cross"],
-        "ind_is_readable": index_format_dict["ind_is_readable"],
-        # "ind_tag_all": index_format_dict["ind_tag_all"],
-       #  "stats_special_txt_2d": index_format_dict["stats_special_txt_2d"],
-        # "stats_special_txt_4d": index_format_dict["stats_special_txt_4d"]
+        "ind_is_readable": index_format_dict["ind_is_readable"]
     }
 
     return gt_dict

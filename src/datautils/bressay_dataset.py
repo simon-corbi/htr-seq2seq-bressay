@@ -12,8 +12,6 @@ from src.datautils.txt_transform import gt_transform_seq2seq_txt_multidecoders_u
 
 class BressayDataset(Dataset):
     """
-    Difference with v2:
-        Tag are in char level
     """
 
     def __init__(self,
@@ -34,7 +32,6 @@ class BressayDataset(Dataset):
 
         self.fixed_size = fixed_size
         self.transforms = transforms
-        # self.subset = subset
 
         self.reduce_dims_factor = reduce_dims_factor
 
@@ -58,7 +55,6 @@ class BressayDataset(Dataset):
 
             path_img = os.path.join(dir_data, id_file + ".png")
             self.image_paths.append(path_img)
-
 
     def __len__(self):
         """
