@@ -36,7 +36,7 @@ parser.add_argument('--milestones_1', default=40, type=int)
 parser.add_argument('--milestones_2', default=80, type=int)
 
 parser.add_argument('--weight_class_tag_text', default=1.0, type=float)
-parser.add_argument('--weight_class_tag', default=1.0, type=float)
+parser.add_argument('--weight_class_tag', default=2.0, type=float)
 
 args = parser.parse_args()
 
