@@ -73,8 +73,8 @@ aug_transforms = [lambda x: affine_transformation(x, s=.1)]
 
 train_db = BressayDataset(directory_train, char_dict, fixed_size_img, reduce_dims_factor,
                           transforms=aug_transforms)
-val_db = BressayDataset(directory_train, char_dict, fixed_size_img, reduce_dims_factor)
-test_db = BressayDataset(directory_train, char_dict, fixed_size_img, reduce_dims_factor)
+val_db = BressayDataset(directory_val, char_dict, fixed_size_img, reduce_dims_factor)
+test_db = BressayDataset(directory_test, char_dict, fixed_size_img, reduce_dims_factor)
 
 print('Nb samples train {}:'.format(len(train_db)))
 print('Nb samples val {}:'.format(len(val_db)))
