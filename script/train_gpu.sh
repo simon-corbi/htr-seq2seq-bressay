@@ -24,6 +24,7 @@ echo "path log :"
 echo ${PATHLOG}
 mkdir ${PATHLOG}
 
+output_file="${PATHLOG}/${SLURM_JOB_ID}.txt"
 
 export PYTHONPATH=/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/
 # export PYTHONPATH="${PYTHONPATH}:/proj/document_analysis/users/x_scorb/codes/htr-seq2seq-bressay/"
